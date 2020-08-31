@@ -1,0 +1,266 @@
+<div class="container">
+	<span>
+		<strong>From <a href="https://www.canada.ca/en/financial-consumer-agency.html">Financial Consumer Agency of Canada</a></strong>
+	</span>
+	<div class="mt-2">
+        <p>This calculator determines your mortgage payment and provides you with a mortgage payment schedule. The calculator also shows how much money and how many years you can save by making prepayments.</p>
+		<p>To help determine whether or not you qualify for a home mortgage based on income and expenses, visit the <a href="https://itools-ioutils.fcac-acfc.gc.ca/MQ-HQ/MQ-EAPH-eng.aspx">Mortgage Qualifier Tool</a>. </p>
+		<p><strong>Note:</strong> As of July 9, 2012, the maximum amortization period for mortgages with less than a 20 percent down payment is <strong>25 years</strong>.</p>
+    </div>
+    <form name="editForm" (ngSubmit)="calculate()" role="form" novalidate #editForm="ngForm">
+    <div class="row mt-3">
+	 	<div class="col-md-6">
+	 		<div class="card card-border-color">
+	 			<div class="card-header pt-2 pb-2 card-header-color text-white"><h6 class="mb-0">Payment Plan</h6></div>
+	 			<div class="card-body p-3">
+		 			<div class="form-group row">
+		 				<div class="col-md-5 pr-0">
+		 					<input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">
+		 					<label class="col-form-label" for="field_mortgageAmount">Mortgage Amount:</label>
+		 				</div>
+		 				<div class="input-group col-md-7">
+		 					<div class="input-group-prepend">
+	          						<div class="input-group-text">$</div>
+	        					</div>
+                   			<input type="text" class="form-control" name="mortgageAmount" id="field_mortgageAmount"
+                       		[(ngModel)]="mortgage.mortAmount" appCurrencyMask required/>
+                       	</div>
+                       	<div [hidden]="!(editForm.controls.mortgageAmount?.dirty && editForm.controls.mortgageAmount?.invalid)">
+		                        <small class="form-text text-danger"
+		                        [hidden]="!editForm.controls.mortgageAmount?.errors?.required">
+		                        <strong>Error 1: Please enter an amount greater than 0 with a maximum of 2 decimal places. Enter "." as a decimal separator and "," as a thousand separator.</strong>
+		                        </small>
+		                </div>
+					</div>
+	 				<div class="form-group row">
+		 				<div class="col-md-5 pr-0">
+		 					<input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">
+		 					<label class="col-form-label" for="field_interestRate">Interest Rate:</label>
+		 				</div>
+		 				<div class="input-group col-md-7">
+                   			<input type="text" class="form-control col-md-5" name="interestRate" id="field_interestRate"
+                       		[(ngModel)]="mortgage.intRate" appCurrencyMask required/>
+                       		<div class="input-group-append">
+	        					<div class="input-group-text">%</div>
+	       					</div>
+                       	</div>
+                       	<div [hidden]="!(editForm.controls.interestRate?.dirty && editForm.controls.interestRate?.invalid)">
+		                        <small class="form-text text-danger"
+		                        [hidden]="!editForm.controls.interestRate?.errors?.required">
+		                        <strong>Error 1: Please enter a percent greater than 0 and less than 100 with a maximum of 2 decimal places. Enter "." as a decimal separator.</strong>
+		                        </small>
+		                </div>
+					</div>
+		 			<div class="form-group row">
+		 				<div class="col-md-5 pr-0">
+							<input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">
+		 					<label class="col-form-label" for="field_amortizationPeriod">Amortization Period:</label>
+		 				</div>
+		 				<div class="col-md-7">
+							<div class="row">
+	 							<div class="col-md-6">
+		                       		<select class="form-control" id="field_amortizationPeriod" name="amortizationPeriod" [(ngModel)]="mortgage.amortPeriodYr" required>
+		                       		   <option [ngValue]="null"></option>
+				                       <option *ngFor="let amortOption of amortPeriods" [ngValue]="amortOption.id === mortgage.amortPeriodYr ? mortgage.amortPeriodYr: amortOption.id">{{amortOption.value}}</option>
+					                    </select>
+					                </div>
+			                   	<div class="col-md-6">
+			                   		<select class="form-control" id="field_amortPeriodMonths" name="amortPeriodMonths" [(ngModel)]="mortgage.amortPeriodMth">
+			                   		<option [ngValue]="null" selected></option>
+			                       	<option *ngFor="let amortMonths of amortPeriodMonths" [ngValue]="amortMonths.value === mortgage.amortPeriodMth ? mortgage.amortPeriodMth: amortMonths.id">{{amortMonths.value}}</option>
+			                    	</select>
+			                   	</div>
+			               	</div>
+                       	</div>
+                       	<div [hidden]="!(editForm.controls.amortizationPeriod?.dirty && editForm.controls.amortizationPeriod?.invalid)">
+		                        <small class="form-text text-danger"
+		                        [hidden]="!editForm.controls.amortizationPeriod?.errors?.required">
+		                        <strong>Error 1: The value you entered in the field 'Amortization Period' is not valid.</strong>
+		                        </small>
+		                </div>
+		                <div [hidden]="mortgage.amortPeriodYr>mortgage.term">
+		                	<small class="form-text text-danger">
+		                        <strong>Error 1: The amortization period must be equal to or greater than the term.</strong>
+		                        </small>
+		                </div>
+		 			</div>
+		 			<div class="form-group row">
+		 				<div class="col-md-5 pr-0">
+							<input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">
+		 					<label class="col-form-label" for="field_paymentFrequency">Payment Frequency:</label>
+		 				</div>
+		 				<div class="col-md-7">
+	                        <select class="form-control" id="field_paymentFrequency" name="paymentFrequency" [(ngModel)]="mortgage.paymentFreq">
+				                <option *ngFor="let paymentFreq of paymentFrequencies" [ngValue]="paymentFreq.value === mortgage.paymentFreq ? mortgage.paymentFreq: paymentFreq.value">{{paymentFreq.value}}</option>
+					        </select>
+                       	</div>
+		 			</div>
+		 			<div class="form-group row">
+		 				<div class="col-md-5 pr-0">
+							<input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">
+		 					<label class="col-form-label" for="field_term">Term:</label>
+		 				</div>
+		 				<div class="col-md-7">
+		 					<div class="row">
+		 						<div class="col-md-6">
+	                        		<select class="form-control" id="field_term" name="term" [(ngModel)]="mortgage.term">
+				                        <option *ngFor="let term of terms" [ngValue]="term.value === mortgage.term ? mortgage.term: term.id">{{term.value}}</option>
+					                </select>
+					            </div>
+			               	</div>
+                       	</div>
+		 			</div>
+		 		</div>
+	 		</div>
+		</div>
+		<div class="col-md-6">
+	 		<div class="card card-border-color">
+	 			<div class="card-header pt-2 pb-2 card-header-color text-white"><h6 class="mb-0">Prepayment Plan</h6></div>
+	 			<div class="card-body p-3">
+		 			<div class="form-group row">
+		 				<div class="col-md-5 pr-0">
+		 					<input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">
+		 					<label class="col-form-label" for="field_prepaymentAmount">Prepayment Amount:</label>
+		 				</div>
+                    	<div class="input-group col-md-7">
+                    		<div class="input-group-prepend">
+	          					<div class="input-group-text">$</div>
+	        				</div>
+                    		<input type="text" class="form-control" name="prepaymentAmount" id="field_prepaymentAmount"
+  		                   	[(ngModel)]="mortgage.prepayAmt" appCurrencyMask/>
+  		                </div>
+  		                <div [hidden]="mortgage.mortAmount>mortgage.prepayAmt">
+		                	<small class="form-text text-danger">
+		                        <strong>Error 1: The prepayment amount must be less than the mortgage amount</strong>
+		                        </small>
+		                </div>
+		 			</div>
+		 			<div class="form-group row">
+		 				<div class="col-md-5 pr-0">
+							<input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">
+		 					<label class="col-form-label pt-0" for="field_prePaymentFrequency">Prepayment Frequency:</label>
+		 				</div>
+		 				<div class="col-md-7">
+	                        <select class="form-control" id="field_prePaymentFrequency" name="prePaymentFrequency" [(ngModel)]="mortgage.prepayFreq">
+				                <option *ngFor="let prePaymentFreq of prePaymentFrequencies" [ngValue]="prePaymentFreq.value === mortgage.prepayFreq ? mortgage.prepayFreq: prePaymentFreq">{{prePaymentFreq.value}}</option>
+					        </select>
+                       	</div>
+		 			</div>
+		 			<div class="form-group row">
+		 				<div class="col-md-5 pr-0">
+		 					<input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">
+		 					<label class="col-form-label" for="field_startWithPay">Start With Payment:</label>
+		 				</div>
+                    	<div class="col-md-7">
+                    		<div class="row">
+                    			<div class="col-md-4">
+                    				<input type="number" min="1" class="form-control" name="startWithPay" id="field_startWithPay" [(ngModel)]="mortgage.startWithPay" required/>
+  		                   		</div>
+  		                   	</div>
+  		                </div>
+  		                <div [hidden]="!(editForm.controls.startWithPay?.dirty && editForm.controls.startWithPay?.invalid)">
+		                        <small class="form-text text-danger"
+		                        [hidden]="!editForm.controls.startWithPay?.errors?.required">
+		                        <strong>Error 1: Please enter a valid whole number greater than 0</strong>
+		                        </small>
+		                </div>
+		                <div [hidden]="mortgage.startWithPay>0">
+		                        <small class="form-text text-danger">
+		                        <strong>Error 1: Please enter a valid whole number greater than 0</strong>
+		                        </small>
+		                </div>
+		 			</div>
+		 		</div>
+	 		</div>
+	 	</div>
+	</div>
+	<div class="row form-group">
+		<div class="col-md-2 mt-3">
+	        <button type="submit" id="save-entity" [disabled]="editForm.form.invalid || (mortgage.amortPeriodYr<=mortgage.term) || (mortgage.mortAmount<=mortgage.prepayAmt) || (mortgage.startWithPay==0)" class="btn calc-button text-white">
+            &nbsp;<span>Calculate ...</span>
+        	</button>
+        </div>
+    </div>
+	</form>
+	<div>
+		<table class="table table-sm table-bordered table-striped">
+			<caption>Calculation Summary</caption>
+		  	<thead>
+		    	<tr>
+		      		<th scope="col">Category</th>
+		      		<th scope="col">Term</th>
+		      		<th scope="col">Amortization Period</th>
+		    	</tr>
+		  	</thead>
+		  	<tbody>
+			    <tr *ngFor="let summary of calculationSummary">
+			      	<td *ngIf="summary.category=='Number of Payments'"><input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">{{summary.category}}</td>
+			      	<td *ngIf="summary.category=='Number of Payments'">{{summary.term}}</td>
+			      	<td *ngIf="summary.category=='Number of Payments'">{{summary.amortizationPeriod}}</td>
+			    </tr>
+			    <tr *ngFor="let summary of calculationSummary">
+			      	<td *ngIf="summary.category!='Number of Payments'"><input type="image" class="mr-1" title="Additional info" src="../../assets/images/help.gif" alt="Mortgage amount help">{{summary.category}}</td>
+			      	<td *ngIf="summary.category!='Number of Payments'">{{summary.term | currency : 'USD' : 'symbol' : '1.2-2'}}</td>
+			      	<td *ngIf="summary.category!='Number of Payments'">{{summary.amortizationPeriod | currency : 'USD' : 'symbol' : '1.2-2'}}</td>
+			    </tr>
+		  </tbody>
+		</table>
+	</div>
+	<div>
+		<h4>Mortgage Summary</h4>
+		<div>
+		    <p>&nbsp;Over the {{amortizationPeriodYr}} amortization period, you will:</p>
+    		<ul>
+		        <li>
+		            have made <strong>{{numMonthlyPayments}}</strong> {{paymentFrequency}} payments of <strong>{{mortgagePayment | currency : 'USD' : 'symbol' : '1.2-2'}}</strong>.
+		        </li>
+		        <li>
+            		have paid <strong>{{principal | currency : 'USD' : 'symbol' : '1.2-2'}}</strong> in principal, <strong>{{interest | currency : 'USD' : 'symbol' : '1.2-2'}}</strong> in interest, for a total of <strong>{{totalPay | currency : 'USD' : 'symbol' : '1.2-2'}}</strong>.</li>
+    		</ul>
+    		<p>&nbsp;Over the {{termYr}} term, you will:</p>
+    		<ul>
+        		<li>
+            		have made <strong>{{numTermPayments}}</strong> {{paymentFrequency}} payments of <strong>{{termMortgagePayment | currency : 'USD' : 'symbol' : '1.2-2'}}</strong>.
+            	</li>
+        		<li>
+            		have paid <strong>{{termPrincipal | currency : 'USD' : 'symbol' : '1.2-2'}}</strong> in principal, <strong>{{termInterest | currency : 'USD' : 'symbol' : '1.2-2'}}</strong> in interest, for a total of <strong>{{termTotalPay | currency : 'USD' : 'symbol' : '1.2-2'}}</strong>.
+            	</li>
+    		</ul>
+    		<p>&nbsp;At the end of your {{termYr}} term, you will:</p>
+    		<ul>
+        		<li>
+            		have a balance of <strong>{{termBalance | currency : 'USD' : 'symbol' : '1.2-2'}}</strong>.
+            	</li>
+    		</ul>
+		</div>
+	</div>
+	<h4>Payment Diagram</h4>	
+	<div class="row">
+		<div class="col-md-6">
+			<!-- Payment History Chart -->
+			    <div style="display: block;">
+				    <canvas baseChart width="400" height="300"
+				                [datasets]="lineChartData"
+				                [labels]="lineChartLabels"
+				                [options]="lineChartOptions"
+				                [colors]="lineChartColors"
+				                [legend]="lineChartLegend"
+				                [chartType]="lineChartType"
+				                (chartHover)="chartHovered($event)"></canvas>
+				</div>
+		</div>
+		<div class="col-md-6">
+			<!-- Interest Payment Chart -->
+			    <div style="display: block;">
+				    <canvas baseChart width="400" height="300"
+		                [datasets]="stackedChartData"
+		                [labels]="stackedChartLabels"
+		                [options]="stackedChartOptions"
+		                [colors]="stackedChartColors"
+		                [legend]="stackedChartLegend"
+		                [chartType]="stackedChartType"
+		                (chartHover)="chartHovered($event)"></canvas>
+				</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,35 @@
+a {
+    color: #284162;
+    text-decoration: underline;
+    background-color: transparent;
+}
+a:visited {
+    color: #7834bc;
+}
+
+caption {
+	color: #333;
+    font-size: 1.1em;
+    font-weight: 700;
+    text-align: center;
+    caption-side: top;
+}
+
+/* card styling */
+.card-border-color {
+	border-color: #2572b4;
+}
+
+.card-header-color {
+	background-color: #2572b4;
+}
+
+/* form styling */
+.col-form-label {
+	font-weight: 700;
+}
+
+.calc-button {
+	border-color: #335075;
+	background-color: #335075;
+}
